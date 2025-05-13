@@ -65,13 +65,23 @@
     </table>
 
     <h3>4. 性能验证与数据</h3>
-    <pre class="mermaid">
-    pie  
-        title Fetch Latency对SPEC92的性能影响（SEQ.3基准）
-        "TC（1 cycle延迟）" : 15  
-        "BAC（2 cycles）" : -10  
-        "Collapsing Buffer（3 cycles）" : -5  
-    </pre>
+    <svg width="700" height="400" xmlns="http://www.w3.org/2000/svg">
+      <!-- 坐标轴 -->
+      <line x1="50" y1="10" x2="50" y2="350" stroke="black" />
+      <line x1="50" y1="350" x2="650" y2="350" stroke="black" />
+      <!-- 标签 -->
+      <text x="50" y="370" text-anchor="middle">TC（1 cycle 延迟）</text>
+      <text x="200" y="370" text-anchor="middle">BAC（2 cycles）</text>
+      <text x="350" y="370" text-anchor="middle">Collapsing Buffer（3 cycles）</text>
+      <!-- 柱子（支持负值） -->
+      <rect x="40" y="300" width="60" height="50" fill="green" />
+      <text x="70" y="290" text-anchor="middle" fill="white">+15%</text>
+      <rect x="190" y="265" width="60" height="85" fill="red" />
+      <text x="220" y="255" text-anchor="middle" fill="white">-10%</text>
+      <rect x="340" y="275" width="60" height="75" fill="orange" />
+      <text x="370" y="265" text-anchor="middle" fill="white">-5%</text>
+    </svg>
+
 
     <h3>5. 待解决问题与改进建议</h3>
     <pre class="mermaid">
