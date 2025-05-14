@@ -1,108 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Trace Cache论文阅读笔记 - HTML版</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script>
-        mermaid.initialize({ startOnLoad: true });
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Deep Dive - CPU Modeling & Sensitivity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs"></script>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
-        h3 { color: #333; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; }
-        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        pre { border: 1px solid #e1e4e8; padding: 10px; background-color: #f6f8fa; margin: 10px 0; }
-        .formula { font-family: monospace; background-color: #f0f0f0; padding: 5px; display: inline-block; }
-        .highlight { color: #e74c3c; font-weight: bold; }
+        body {
+            background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .mermaid {
+            background-color: #ffffffcc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
-<body>
-    <h1>Trace Cache论文阅读笔记</h1>
+<body class="min-h-screen p-8">
+    <!-- Header -->
+    <header class="text-center mb-12">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">技術細節</h1>
+        <p class="text-xl text-gray-600">CPU資源抽象化與敏感度測試流程</p>
+    </header>
 
-    <h3>1. 核心概念与问题</h3>
-    <p>**问题背景**：<br>
-    <span class="highlight">带宽不足</span>：超标量处理器因分支密集，传统指令缓存无法单周期获取多个非连续基本块。<br>
-    <span class="highlight">延迟瓶颈</span>：分支预测错误或缓存缺失时，传统机制需重新获取指令，导致流水线停顿。<br>
-    <span class="highlight">分支预测限制</span>：单分支预测/周期的吞吐量不足，无法支持高发射宽度（>4条/cycle）。<br>
-    **核心思想**：<br>
-    动态轨迹缓存（Trace Cache）缓存动态指令流的执行路径（trace），合并非连续基本块为连续指令，减少带宽与延迟。</p>
+    <!-- Technical Content Grid -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <!-- CPU Resource Modeling -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">CPU資源抽象模型</h2>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span class="text-blue-800 font-bold">1</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">執行埠模擬：量化ALU、AGU、記憶體埠的吞吐量限制</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span class="text-blue-800 font-bold">2</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">指令窗口建模：ROB大小與指令級平行度的動態交互</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span class="text-blue-800 font-bold">3</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">快取行為模擬：L1/L2快取延遲與替換策略的抽象化</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                        <span class="text-blue-800 font-bold">4</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">資源競爭建模：多指令對共享資源的排程衝突</p>
+                </div>
+            </div>
+        </div>
 
-    <h3>2. Trace Cache结构与工作流程</h3>
-    <pre class="mermaid">
-    graph TD  
-        A[当前指令地址] --> B[Trace Cache访问]  
-        B -->|命中| C[返回Trace Line]  
-        C --> D[解码与执行]  
-        B -->|未命中| E[核心指令缓存]  
-        E --> F[线填充（Line-Fill）逻辑]  
-        F --> G[合并非连续指令] --> H[写入Trace Cache]  
-        A --> I[分支预测器]  
-        I --> B[分支路径标志]  
-        style B stroke:#0058a0,stroke-width:2px  
-        style C stroke:#4CAF50,stroke-width:2px  
-        style E stroke:#e91e63,stroke-width:2px  
-    </pre>
-
-    <h3>3. 与传统机制的对比</h3>
-    <table>
-        <tr><th>方案</th><th>优势</th><th>劣势</th></tr>
-        <tr>
-            <td>Trace Cache</td>
-            <td>低延迟，直接缓存路径，无需重组</td>
-            <td>直接映射冲突（trace miss rate≈34%）</td>
-        </tr>
-        <tr>
-            <td>Branch Address Cache</td>
-            <td>多分支预测灵活，缓存控制流图分支路径</td>
-            <td>需多级缓存，存在缓存冲突与对齐开销</td>
-        </tr>
-        <tr>
-            <td>Collapsing Buffer</td>
-            <td>通过合并指令支持短跳转</td>
-            <td>多阶段流水线，延迟高（3 cycle）</td>
-        </tr>
-    </table>
-
-    <h3>4. 性能验证与数据</h3>
-    <svg width="700" height="400" xmlns="http://www.w3.org/2000/svg">
-      <!-- 坐标轴 -->
-      <line x1="50" y1="10" x2="50" y2="350" stroke="black" />
-      <line x1="50" y1="350" x2="650" y2="350" stroke="black" />
-      <!-- 标签 -->
-      <text x="50" y="370" text-anchor="middle">TC（1 cycle 延迟）</text>
-      <text x="200" y="370" text-anchor="middle">BAC（2 cycles）</text>
-      <text x="350" y="370" text-anchor="middle">Collapsing Buffer（3 cycles）</text>
-      <!-- 柱子（支持负值） -->
-      <rect x="40" y="300" width="60" height="50" fill="green" />
-      <text x="70" y="290" text-anchor="middle" fill="white">+15%</text>
-      <rect x="190" y="265" width="60" height="85" fill="red" />
-      <text x="220" y="255" text-anchor="middle" fill="white">-10%</text>
-      <rect x="340" y="275" width="60" height="75" fill="orange" />
-      <text x="370" y="265" text-anchor="middle" fill="white">-5%</text>
-    </svg>
-
-
-    <h3>5. 待解决问题与改进建议</h3>
-    <pre class="mermaid">
-    graph LR  
-        A[路径关联（Path Associativity）] --> B{减少冲突丢失}  
-        C[部分命中机制（Partial Match）] --> B  
-        D[间接跳转预测扩展] --> E[支持复杂控制流]  
-        F[Victim Cache] --> G[保留高复用Trace]  
-        H[硬件功耗/面积分析] --> I[优化实际实现]  
-    </pre>
-
-    <h3>6. 关键公式与数据</h3>
-    <div class="formula">  
-        Trace Miss Rate = <span style="text-decoration: overline;">Trace Cache Misses</span>  
-                       / <span style="text-decoration: overline;">Total Accesses</span>  
-    </div>  
-    <p>示例：4KB Trace Cache的trace miss rate为34%（表3）</p>
-
-    <div class="formula">  
-        IPC提升 = (TC IPC - Base IPC) / Base IPC × 100%  
+        <!-- Sensitivity Testing -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">敏感度測試流程</h2>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                        <span class="text-green-800 font-bold">A</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">基線測量：建立原始資源配置的執行基準</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                        <span class="text-green-800 font-bold">B</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">資源調整：逐步提升特定資源性能（如+20%埠吞吐）</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                        <span class="text-green-800 font-bold">C</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">差異分析：比較調整前後的執行週期變化</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                        <span class="text-green-800 font-bold">D</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">敏感度指數：量化資源改善對整體效能的影響程度</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Mermaid Algorithm Flowchart -->
+    <div class="max-w-5xl mx-auto mb-12">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">敏感度分析演算法</h2>
+        <div class="mermaid">
+            flowchart LR
+                subgraph 資源建模
+                    A[建立CPU資源模型] --> B[定義資源限制參數])
+                end
+                
+                subgraph 敏感度測試
+                    B --> C[執行基準模擬]
+                    C --> D[調整資源參數]
+                    D --> E[執行壓力測試]
+                end
+                
+                subgraph 瓶頸分析
+                    E --> F[比較執行週期差異]
+                    F --> G[敏感度指數計算]
+                    G --> H[生成資源優先順序]
+                end
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-between max-w-3xl mx-auto mt-12">
+        <a href="#previous-page" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            上一頁
+        </a>
+        <a href="#next-page" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            下一頁：實驗結果
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm mt-16">
+        <p>© 2023 微架構效能分析報告 | 技術支援：TailwindCSS & Mermaid.js</p>
+    </footer>
 </body>
 </html>
