@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methodology - Gus Tool Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .mermaid {
+            background-color: #ffffffcc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <!-- Header -->
+    <header class="text-center mb-12">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">方法論</h1>
+        <p class="text-xl text-gray-600">Gus 工具架構與敏感度分析原理</p>
+    </header>
+
+    <!-- Sensitivity Analysis Section -->
+    <div class="max-w-5xl mx-auto mb-12">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">敏感度分析原理</h2>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <p class="text-gray-600 leading-relaxed mb-4">
+                Gus 通過動態調整 CPU 資源參數來識別效能瓶頸：
+            </p>
+            <ol class="list-decimal pl-6 text-gray-600 space-y-2">
+                <li>在模擬執行中逐步提升特定資源性能（如執行埠吞吐量）</li>
+                <li>量測不同配置下的程式執行時間變化</li>
+                <li>根據性能改善幅度判斷資源限制程度</li>
+                <li>建立資源敏感度指數進行量化分析</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Gus Architecture Section -->
+    <div class="max-w-5xl mx-auto mb-12">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Gus 三層架構</h2>
+        
+        <!-- Architecture Diagram -->
+        <div class="mermaid">
+            flowchart TB
+                subgraph QEMU插件
+                    A[動態二進位插樁]
+                    B[執行軌跡收集]
+                end
+                
+                subgraph 抽象CPU模型
+                    C[資源中心模擬]
+                    D[指令窗口建模]
+                    E[快取行為模擬]
+                end
+                
+                subgraph 敏感度引擎
+                    F[多配置模擬]
+                    G[性能比較分析]
+                    H[瓶頸量化報告]
+                end
+                
+                A --> C --> F
+                B --> D
+                D --> F
+                E --> F
+                F --> G --> H
+        </div>
+
+        <!-- Component Descriptions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-blue-800 mb-2">QEMU 插件</h3>
+                <p class="text-sm text-blue-700">實現無侵入式插樁，收集執行軌跡與資源使用數據</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-green-800 mb-2">抽象CPU模型</h3>
+                <p class="text-sm text-green-700">模擬執行埠、ROB、快取等微架構資源的互動行為</p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg">
+                <h3 class="font-semibold text-purple-800 mb-2">敏感度引擎</h3>
+                <p class="text-sm text-purple-700">自動化測試多種資源配置，生成量化瓶頸報告</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-between max-w-3xl mx-auto mt-12">
+        <a href="p2.html" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            上一頁
+        </a>
+        <a href="p4.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            下一頁：技術細節
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm mt-16">
+        <p>© 2023 微架構效能分析報告 | 技術支援：TailwindCSS & Mermaid.js</p>
+    </footer>
+</body>
+</html>
