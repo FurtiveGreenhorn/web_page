@@ -95,22 +95,20 @@
     <div class="max-w-5xl mx-auto mb-12">
         <h2 class="text-2xl font-semibold text-gray-700 mb-4">敏感度分析演算法</h2>
         <div class="mermaid">
-            flowchart LR
-                subgraph 資源建模
-                    A[建立CPU資源模型] --> B[定義資源限制參數]
-                end
-                
-                subgraph 敏感度測試
-                    B --> C[執行基準模擬]
-                    C --> D[調整資源參數]
-                    D --> E[執行壓力測試]
-                end
-                
-                subgraph 瓶頸分析
-                    E --> F[比較執行週期差異]
-                    F --> G[敏感度指數計算]
-                    G --> H[生成資源優先順序]
-                end
+        flowchart LR
+            subgraph 資源建模
+                A[建立CPU資源模型] --> B[定義資源限制參數]
+            end
+            subgraph 敏感度測試
+                B --> C[執行基準模擬]
+                C --> D[調整資源參數]
+                D --> E[執行壓力測試]
+            end
+            subgraph 瓶頸分析
+                E --> F[比較執行週期差異]
+                F --> G[敏感度指數計算]
+                G --> H[生成資源優先順序]
+            end
         </div>
     </div>
 
