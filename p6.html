@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Analysis - Limitations & Trade-offs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .mermaid {
+            background-color: #ffffffcc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <!-- Header -->
+    <header class="text-center mb-12">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">批判分析</h1>
+        <p class="text-xl text-gray-600">Gus 工具的限制與改進方向</p>
+    </header>
+
+    <!-- Critical Analysis Grid -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <!-- Limitations Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">主要限制</h2>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                        <span class="text-red-800 font-bold">1</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">模擬開銷：比perf高約3-5倍的執行時間</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                        <span class="text-red-800 font-bold">2</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">前端依賴：目前僅支援QEMU插樁，缺乏LLVM等現代化框架整合</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                        <span class="text-red-800 font-bold">3</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">微架構覆蓋：缺乏對超執行緒與SIMD指令的完整建模</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade-offs Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">權衡分析</h2>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center mt-0.5">
+                        <span class="text-amber-800 font-bold">A</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">準確性 vs 開銷：更高的模擬精度導致執行時間增加</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center mt-0.5">
+                        <span class="text-amber-800 font-bold">B</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">通用性 vs 專精度：專注於OoO CPU導致嵌入式架構支援不足</p>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center mt-0.5">
+                        <span class="text-amber-800 font-bold">C</span>
+                    </div>
+                    <p class="ml-3 text-gray-600">動態分析 vs 靜態預測：難以處理編譯時期可優化的模式</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Comparison Table -->
+    <div class="max-w-5xl mx-auto mb-12">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">工具比較矩陣</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-300 divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold">工具</th>
+                        <th class="px-4 py-3 text-left font-semibold">動態行為捕捉</th>
+                        <th class="px-4 py-3 text-left font-semibold">資源定位精度</th>
+                        <th class="px-4 py-3 text-left font-semibold">可擴展性</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white text-gray-700">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium">Gus</td>
+                        <td class="px-4 py-3 bg-green-50">Full dynamic trace</td>
+                        <td class="px-4 py-3 bg-green-50">Instruction-level mapping</td>
+                        <td class="px-4 py-3 bg-yellow-50">Moderate (QEMU-bound)</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium">perf</td>
+                        <td class="px-4 py-3 bg-yellow-50">Sampling-based</td>
+                        <td class="px-4 py-3 bg-red-50">No pipeline awareness</td>
+                        <td class="px-4 py-3 bg-green-50">High (Linux-native)</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium">IACA</td>
+                        <td class="px-4 py-3 bg-red-50">Static estimation only</td>
+                        <td class="px-4 py-3 bg-yellow-50">Heuristic-level mapping</td>
+                        <td class="px-4 py-3 bg-yellow-50">Moderate (x86-specific)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 顏色圖例說明 -->
+        <div class="mt-3 text-sm text-gray-600">
+            <p class="flex items-center space-x-4">
+                <span class="inline-flex items-center"><span class="w-4 h-4 inline-block bg-green-100 border border-green-300 mr-1 rounded-sm"></span> 高支援度 / 強功能</span>
+                <span class="inline-flex items-center"><span class="w-4 h-4 inline-block bg-yellow-100 border border-yellow-300 mr-1 rounded-sm"></span> 中等支援 / 侷限情境</span>
+                <span class="inline-flex items-center"><span class="w-4 h-4 inline-block bg-red-100 border border-red-300 mr-1 rounded-sm"></span> 支援不足 / 缺乏對應能力</span>
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Navigation -->
+    <div class="flex justify-between max-w-3xl mx-auto mt-12">
+        <a href="p5.html" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            上一頁
+        </a>
+        <a href="p7.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+            下一頁：未來工作
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm mt-16">
+        <p>© 2023 微架構效能分析報告 | 技術支援：TailwindCSS & Mermaid.js</p>
+    </footer>
+</body>
+</html>
